@@ -3,3 +3,4 @@ __pycache__
 .venv
 main.py
 .ruff_cache
+.python-version
