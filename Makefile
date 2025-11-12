@@ -8,7 +8,7 @@ render-start:
 	gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer.app:app
 
 lint:
-	uv run ruff check app.py
+	uv run ruff check page_analyzer/app.py
 
 test:
 	uv run pytest
