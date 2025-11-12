@@ -10,9 +10,6 @@ render-start:
 lint:
 	uv run ruff check page_analyzer/app.py
 
-test:
-	uv run pytest
-
 dev:
 	uv run flask --debug --app page_analyzer.app:app run
 
