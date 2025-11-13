@@ -30,7 +30,12 @@ def create_url():
     }
 
     errors = validate(url_data)
-    print(f"Найдены ошибки:{errors}")
+
+    if not errors:
+        existing_url = repo.find_by_name(url)
+        if existing_url:
+            flash("Страница уже существует", 'error')
+            return redirect(url_for('show_urls', id=existing_url['id']))
 
     if errors:
         for field, error in errors.items():
