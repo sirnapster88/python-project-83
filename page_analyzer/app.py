@@ -2,7 +2,8 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
-from .repository import get_db, UrlsRepository
+
+from .repository import UrlsRepository, get_db
 from .validator import validate
 
 load_dotenv()
@@ -46,7 +47,7 @@ def create_url():
             return render_template('urls.html', url_data=url_data, errors=errors), 422
 
     saved_id = repo.save(url_data)
-    
+
     flash("Страница успешно добавлена", 'success')
     return redirect(url_for('show_urls', id=saved_id))
 
