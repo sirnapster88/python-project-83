@@ -20,25 +20,35 @@ class UrlsRepository:
         self.conn = conn
 
     def get_urls(self):
-        with self.conn.cursor(row_factory=dict_row) as cur:
+        with self.conn.cursor() as cur:
             cur.execute('SELECT * FROM urls')
             return cur.fetchall()
 
     def find(self, id):
-        with self.conn.cursor(row_factory=dict_row) as cur:
-            cur.execute(
-                """SELECT * FROM urls WHERE id = %s""",
-                (id,)
-            )
-            return cur.fetchone()
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """SELECT * FROM urls WHERE id = %s""",
+                    (id,)
+                )
+                return cur.fetchone()
+            print ("Запись найдена!")
+        except Exception as e:
+            print(f"Ошибка поиска:{e}")
+            raise
 
 
     def save(self, url_data):
-        with self.conn.cursor() as cur:
-            cur.execute(
-                """INSERT INTO urls (name) VALUES (%s) RETURNING id""",
-                (url_data['name'],)
-            )
-            saved_id = cur.fetchone()[0]
-        self.conn.commit()
-        return saved_id
+        try: 
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """INSERT INTO urls (name) VALUES (%s) RETURNING id""",
+                    (url_data['name'],)
+                )
+                saved_id = cur.fetchone()[0]
+            self.conn.commit()
+            print("Запись добалвена!")
+            return saved_id
+        except Exception as e:
+            print(f"Ошибка добавления в БД:{e}")
+            raise

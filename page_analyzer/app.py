@@ -39,8 +39,6 @@ def create_url():
             return render_template('index.html', url_data=url_data, errors=errors), 422
         else:
             return render_template('urls.html', url_data=url_data, errors=errors), 422
-    
-    #repo.save(url_data)
 
     saved_id = repo.save(url_data)
     
