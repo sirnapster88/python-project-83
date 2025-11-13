@@ -40,10 +40,21 @@ def create_url():
         else:
             return render_template('urls.html', url_data=url_data, errors=errors), 422
     
-    repo.save(url_data)
+    #repo.save(url_data)
+
+    saved_id = repo.save(url_data)
     
     flash("Страница успешно добавлена", 'success')
-    return redirect(url_for('urls'))
+    return redirect(url_for('show_urls', id=saved_id))
+
+@app.route('/urls/<int:id>')
+def show_urls(id):
+    url = repo.find(id)
+    if not url:
+        flash('Страница не найдена','error')
+        return redirect(url_for('urls'))
+    return render_template('show_urls.html', url=url)
+
 
 
 if __name__ == '__main__':

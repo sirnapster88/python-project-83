@@ -21,14 +21,15 @@ class UrlsRepository:
                 """SELECT * FROM urls WHERE id = %s""",
                 (id,)
             )
-            row = cur.fetchone()
-            return dict(row) if row else None
+            return cur.fetchone()
 
 
     def save(self, url_data):
         with self.conn.cursor() as cur:
             cur.execute(
-                """INSERT INTO urls (name) VALUES (%s)""",
+                """INSERT INTO urls (name) VALUES (%s) RETURNING id""",
                 (url_data['name'],)
             )
+            saved_id = cur.fetchone()[0]
         self.conn.commit()
+        return saved_id
