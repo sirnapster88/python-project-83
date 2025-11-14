@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
-from .repository import UrlsRepository, ChecksRepository
+from .repository import ChecksRepository, UrlsRepository
 from .validator import validate
 
 load_dotenv()
@@ -58,7 +58,7 @@ def show_urls(id):
     if not url:
         flash('Страница не найдена','error')
         return redirect(url_for('urls'))
-    
+
     checks = checks_repo.get_checks_by_url_id(id)
 
     return render_template('show_urls.html', url=url, checks=checks)
@@ -66,8 +66,7 @@ def show_urls(id):
 
 @app.route('/urls/<int:id>/checks', methods = ['POST'])
 def check_url(id):
-    check_url = checks_repo.create_check(id)
-
+    checks_repo.create_check(id)
     flash("Страница успешно проверена",'success')
     return redirect(url_for('show_urls', id=id))
 
