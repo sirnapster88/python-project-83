@@ -2,10 +2,6 @@ import psycopg
 
 from psycopg.rows import dict_row
 
-#def get_db(app):
-#    database_url = app.config['DATABASE_URL']
-#    return psycopg.connect(database_url)
-
 
 class UrlsRepository:
     def __init__(self, db_url):
@@ -62,3 +58,40 @@ class UrlsRepository:
         finally:
             conn.close()
        
+
+class ChecksRepository:
+    def __init__(self, db_url):
+        self.db_url = db_url
+
+    def _get_connection(self):
+        return psycopg.connect(self.db_url)
+
+    
+    def create_check(self, url_id):
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """INSERT INTO url_checks (url_id) VALUES (%s) RETURNING id""",
+                    (url_id,) 
+                )
+                check_id = cur.fetchone()[0]
+                conn.commit()
+            return check_id
+        finally:
+            conn.close()
+    
+    def get_checks_by_url_id(self, url_id):
+        conn = self._get_connection()
+        try:
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    """SELECT * FROM url_checks
+                        WHERE url_id = %s
+                        ORDER BY id DESC""",
+                    (url_id,)    
+                )
+                return cur.fetchall()
+        finally:
+            conn.close()
+                
