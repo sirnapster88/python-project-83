@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
-from .repository import UrlsRepository, get_db
+from .repository import UrlsRepository #, get_db
 from .validator import validate
 
 load_dotenv()
@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
 
-repo = UrlsRepository(get_db(app))
+repo = UrlsRepository(app.config['DATABASE_URL'])
 
 @app.route('/')
 def index():
