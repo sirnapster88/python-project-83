@@ -44,10 +44,10 @@ def create_url_from_index():
     if errors:
         for error in errors.items():
             flash(f"{error}", "error")
-        if request.path == "/urls":
-            return render_template("urls.html", url_data=url_data, errors=errors), 422  # noqa: E501
-        else:
+        if request.path == "/":
             return render_template("index.html", url_data=url_data, errors=errors), 422  # noqa: E501
+        else:
+            return render_template("urls.html", url_data=url_data, errors=errors), 422  # noqa: E501
 
     saved_id = repo.save(url_data)
 
