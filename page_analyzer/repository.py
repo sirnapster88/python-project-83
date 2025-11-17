@@ -41,24 +41,31 @@ class UrlsRepository:
         #поиск в таблице urls по имени url
         conn = self._get_connection()
         try:
+            normalized_name = self._normalize_url(name)
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(
                     """SELECT * FROM urls where name = %s""",
-                    (name,)
+                    (normalized_name,)
                 )
                 return cur.fetchone()
         finally:
             conn.close()
+    
+    def _normalize_url(self, url):
+        if url.endswith('/'):
+            url = url[:-1]
+            return url
 
 
     def save(self, url_data):
         #функция добавления новой записи в таблицу urls
         conn = self._get_connection()
         try:
+            normalized_name = self._normalize_url(url_data['name'])
             with conn.cursor() as cur:
                 cur.execute(
                     """INSERT INTO urls (name) VALUES (%s) RETURNING id""",
-                    (url_data['name'],)
+                    (normalized_name,)
                 )
                 saved_id = cur.fetchone()[0]
                 conn.commit()
