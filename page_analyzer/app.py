@@ -33,11 +33,10 @@ def create_url():
 
     errors = validate(url_data)
 
-    if not errors:
-        existing_url = repo.find_by_name(url)
-        if existing_url:
-            flash("Страница уже существует", 'error')
-            return redirect(url_for('show_urls', id=existing_url['id']))
+    existing_url = repo.find_by_name(url)
+    if existing_url:
+        flash("Страница уже существует",'error')
+        return redirect(url_for('show_urls', id=existing_url['id']))
 
     if errors:
         for field, error in errors.items():
@@ -46,11 +45,7 @@ def create_url():
             return render_template('index.html', url_data=url_data, errors=errors), 422
         else:
             return render_template('urls.html', url_data=url_data, errors=errors), 422
-
-    existing_url = repo.find_by_name(url)
-    if existing_url:
-        flash("Страница уже существует",'error')
-        return redirect(url_for('show_urls', id=existing_url['id']))
+    
 
     saved_id = repo.save(url_data)
 
