@@ -20,7 +20,7 @@ def index():
 
 @app.route('/urls')
 def urls():
-    urls = repo.get_urls()
+    urls = repo.get_url_with_checks()
     return render_template('/urls.html', urls=urls)
 
 @app.route('/urls', methods = ['POST'])
@@ -46,6 +46,11 @@ def create_url():
             return render_template('index.html', url_data=url_data, errors=errors), 422
         else:
             return render_template('urls.html', url_data=url_data, errors=errors), 422
+
+    existing_url = repo.find_by_name(url)
+    if existing_url:
+        flash("Страница уже существует",'error')
+        return redirect(url_for('show_urls', id=existing_url['id']))
 
     saved_id = repo.save(url_data)
 

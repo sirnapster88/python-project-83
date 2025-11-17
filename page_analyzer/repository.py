@@ -65,6 +65,25 @@ class UrlsRepository:
             return saved_id
         finally:
             conn.close()
+    
+    def get_url_with_checks(self):
+        conn = self._get_connection()
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(
+                    """SELECT
+                            u.id,
+                            u.name,
+                            uc.created_at,
+                            uc.status_code
+                        FROM urls u
+                        LEFT JOIN url_checks uc ON u.id=uc.url_id
+                        AND uc.id = (SELECT MAX(id) FROM url_checks WHERE url_id = u.id)
+                        ORDER BY u.id DESC"""
+                )
+                return cur.fetchall()
+        finally:
+            conn.close()
        
 
 class ChecksRepository:
@@ -91,15 +110,15 @@ class ChecksRepository:
 
             #получение тега h1
             h1_tag = soup.find('h1')
-            h1 = h1_tag.get_text().strip() if h1_tag else None
+            h1 = h1_tag.get_text().strip() if h1_tag else ''
 
             #получение тега title
             title_tag = soup.find('title')
-            title = title_tag.get_text().strip() if title_tag else None
+            title = title_tag.get_text().strip() if title_tag else ''
 
             #получение meta
-            meta_desctription = soup.find('meta', attrs={'name':'description'})
-            description = meta_desctription.get('content').strip() if meta_desctription else None
+            meta_description = soup.find('meta', attrs={'name':'description'})
+            description = meta_description.get('content').strip() if meta_description else ''
 
             status_code = response.status_code
             
@@ -113,16 +132,21 @@ class ChecksRepository:
                 check_id = cur.fetchone()[0]
                 conn.commit()
             return check_id
-        except requests.exceptions.HTTPError as e:
-            print(f"HTTP ошибка при проверке сайта {url_name}: {e}")
-            return None
-        except requests.exceptions.RequestException as e:
-            print(f"Ошибка соединения при проверке {url_name}: {e}")
-            return None
         except Exception as e:
-            print(f"Ошибка при парсинге HTML: {e}")
-            return None
-
+            print(f"Ошибка при создании проверки:{e}")
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """INSERT INTO url_checks (url_id) VALUES (%s) 
+                        RETURNING ID""",
+                        (url_id,)
+                    )
+                check_id = cur.fetchone()[0]
+                conn.commit()
+                return check_id
+            except Exception as inner_e:
+                print(f"Ошибка при создании пустой проверки:{inner_e}")
+                return None
         finally:
             conn.close()
     
@@ -140,4 +164,6 @@ class ChecksRepository:
                 return cur.fetchall()
         finally:
             conn.close()
+
+    
                 

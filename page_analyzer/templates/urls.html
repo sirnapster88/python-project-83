@@ -36,6 +36,7 @@
       <th>ID</th>
       <th>Имя</th>
       <th>Последняя проверка</th>
+      <th>Код ответа</th>
     </tr>
     </thead>
     <tbody>
@@ -44,7 +45,8 @@
         <tr>
             <td>{{ url.id }}</td>
             <td><a href = "{{ url_for('show_urls', id=url.id) }}">{{ url.name }}</a></td>
-            <td>{{ url.created_at }}</td>
+            <td>{{ url.created_at if url.created_at else '' }}</td>
+            <td>{{ url.status_code if url.status_code else '' }}</td>
         </tr>
         {% endfor %}
       
