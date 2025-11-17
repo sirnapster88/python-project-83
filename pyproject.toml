@@ -10,7 +10,7 @@ dependencies = [
     "gunicorn",
     "psycopg>=3.2.12",
     "psycopg2>=2.9.11",
-    "pytest>=9.0.0",
+    "pytest>=6.2.4,<9.0.0",
     "python-dotenv>=1.2.1",
     "requests>=2.32.5",
     "ruff>=0.14.4",
@@ -21,8 +21,7 @@ page-analyzer = "app:app"
 
 [project.optional-dependencies]
 dev = [
-    "ruff",
-    "pytest"
+    "ruff"
 ]
 
 [tool.ruff]
