@@ -8,80 +8,81 @@ from .validator import validate
 
 load_dotenv()
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["DATABASE_URL"] = os.getenv("DATABASE_URL")
 
-repo = UrlsRepository(app.config['DATABASE_URL'])
-checks_repo = ChecksRepository(app.config['DATABASE_URL'])
+repo = UrlsRepository(app.config["DATABASE_URL"])
+checks_repo = ChecksRepository(app.config["DATABASE_URL"])
 
-@app.route('/')
+
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/urls')
+
+@app.route("/urls")
 def urls():
     urls = repo.get_url_with_checks()
-    return render_template('/urls.html', urls=urls)
+    return render_template("/urls.html", urls=urls)
 
-@app.route('/', methods=['POST'])
-@app.route('/urls', methods=['POST'])
+
+@app.route("/", methods=["POST"])
+@app.route("/urls", methods=["POST"])
 def create_url_from_index():
-    url = request.form.get('url')
+    url = request.form.get("url")
     url_data = {
-        'name': url,
+        "name": url,
     }
 
     errors = validate(url_data)
 
     existing_url = repo.find_by_name(url)
     if existing_url:
-        flash("Страница уже существует",'error')
-        return redirect(url_for('show_urls', id=existing_url['id']))
+        flash("Страница уже существует", "error")
+        return redirect(url_for("show_urls", id=existing_url["id"]))
 
     if errors:
         for error in errors.items():
-            flash(f"{error}", 'error')
-        if request.path == '/urls':
-            return render_template('urls.html', url_data=url_data, errors=errors), 422
+            flash(f"{error}", "error")
+        if request.path == "/urls":
+            return render_template("urls.html", url_data=url_data, errors=errors), 422
         else:
-            return render_template('imdex.html', url_data=url_data, errors=errors), 422
-
+            return render_template("imdex.html", url_data=url_data, errors=errors), 422
 
     saved_id = repo.save(url_data)
 
-    flash("Страница успешно добавлена", 'success')
-    return redirect(url_for('show_urls', id=saved_id))
+    flash("Страница успешно добавлена", "success")
+    return redirect(url_for("show_urls", id=saved_id))
 
 
-@app.route('/urls/<int:id>')
+@app.route("/urls/<int:id>")
 def show_urls(id):
     url = repo.find(id)
     if not url:
-        flash('Страница не найдена','error')
-        return redirect(url_for('urls'))
+        flash("Страница не найдена", "error")
+        return redirect(url_for("urls"))
 
     checks = checks_repo.get_checks_by_url_id(id)
 
-    return render_template('show_urls.html', url=url, checks=checks)
+    return render_template("show_urls.html", url=url, checks=checks)
 
 
-@app.route('/urls/<int:id>/checks', methods = ['POST'])
+@app.route("/urls/<int:id>/checks", methods=["POST"])
 def check_url(id):
     url = repo.find(id)
     if not url:
-        flash('Страница не найдена','error')
-        return redirect(url_for('urls'))
+        flash("Страница не найдена", "error")
+        return redirect(url_for("urls"))
 
-
-    check_id = checks_repo.create_check(id, url['name'])
+    check_id = checks_repo.create_check(id, url["name"])
 
     if check_id:
-        flash("Страница успешно проверена",'success')
+        flash("Страница успешно проверена", "success")
     else:
-        flash("Произошла ошибка при проверке",'error')
+        flash("Произошла ошибка при проверке", "error")
 
-    return redirect(url_for('show_urls', id=id))
+    return redirect(url_for("show_urls", id=id))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
