@@ -54,7 +54,7 @@ class UrlsRepository:
     def _normalize_url(self, url):
         if url.endswith('/'):
             url = url[:-1]
-            return url
+        return url
 
 
     def save(self, url_data):
