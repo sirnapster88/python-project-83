@@ -27,7 +27,7 @@ def urls():
 
 
 @app.route("/", methods=["POST"])
-@app.route("/urls", methods=["POST"])
+#@app.route("/urls", methods=["POST"])
 def create_url_from_index():
     url = request.form.get("url")
     url_data = {
@@ -47,7 +47,7 @@ def create_url_from_index():
         if request.path == "/urls":
             return render_template("urls.html", url_data=url_data, errors=errors), 422
         else:
-            return render_template("imdex.html", url_data=url_data, errors=errors), 422
+            return render_template("index.html", url_data=url_data, errors=errors), 422
 
     saved_id = repo.save(url_data)
 
