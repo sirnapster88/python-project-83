@@ -1,17 +1,21 @@
 import psycopg
 import requests
 
+from bs4 import BeautifulSoup
 from psycopg.rows import dict_row 
 
 
 class UrlsRepository:
+    """Репозиторий для работы с БД Urls"""
     def __init__(self, db_url):
         self.db_url = db_url
     
     def _get_connection(self):
+        #создание подключения
         return psycopg.connect(self.db_url)
 
     def get_urls(self):
+        #получение всей таблицы urls
         conn = self._get_connection()
         try:
             with conn.cursor(row_factory=dict_row) as cur:
@@ -21,6 +25,7 @@ class UrlsRepository:
             conn.close()
 
     def find(self, id):
+        #поиск в таблице urls по id url
         conn = self._get_connection()
         try:
             with conn.cursor(row_factory=dict_row) as cur:
@@ -33,6 +38,7 @@ class UrlsRepository:
             conn.close()
     
     def find_by_name(self, name):
+        #поиск в таблице urls по имени url
         conn = self._get_connection()
         try:
             with conn.cursor(row_factory=dict_row) as cur:
@@ -46,6 +52,7 @@ class UrlsRepository:
 
 
     def save(self, url_data):
+        #функция добавления новой записи в таблицу urls
         conn = self._get_connection()
         try:
             with conn.cursor() as cur:
@@ -61,24 +68,47 @@ class UrlsRepository:
        
 
 class ChecksRepository:
+    """Репозиторий для работы с таблицей проверок url_checks"""
     def __init__(self, db_url):
         self.db_url = db_url
 
     def _get_connection(self):
+        #создание подключения
         return psycopg.connect(self.db_url)
 
     
     def create_check(self, url_id, url_name):
+        #создание в таблице url_checks новой записи о проверке
         conn = self._get_connection()
         try:
-            response = requests.get(url_name, timeout=10)
-            response.raise_for_status()
+            #осуществление запроса get на url
+            response = requests.get(url_name, timeout=10) 
+            #получение статус ответа (с исключением 4хх и 5хх ошибок)
+            response.raise_for_status() 
+
+            #создание парсера BeautifulSoup
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            #получение тега h1
+            h1_tag = soup.find('h1')
+            h1 = h1_tag.get_text().strip() if h1_tag else None
+
+            #получение тега title
+            title_tag = soup.find('title')
+            title = title_tag.get_text().strip() if title_tag else None
+
+            #получение meta
+            meta_desctription = soup.find('meta', attrs={'name':'description'})
+            description = meta_desctription.get('content').strip() if meta_desctription else None
+
             status_code = response.status_code
+            
+            #выполнение записи в таблицу url_checks новых данных
             with conn.cursor() as cur:
                 cur.execute(
-                    """INSERT INTO url_checks (url_id, status_code) 
-                        VALUES (%s, %s) RETURNING id""",
-                    (url_id, status_code) 
+                    """INSERT INTO url_checks (url_id, status_code, h1, title, description) 
+                        VALUES (%s, %s, %s, %s, %s) RETURNING id""",
+                    (url_id, status_code, h1, title, description) 
                 )
                 check_id = cur.fetchone()[0]
                 conn.commit()
@@ -89,11 +119,15 @@ class ChecksRepository:
         except requests.exceptions.RequestException as e:
             print(f"Ошибка соединения при проверке {url_name}: {e}")
             return None
+        except Exception as e:
+            print(f"Ошибка при парсинге HTML: {e}")
+            return None
 
         finally:
             conn.close()
     
     def get_checks_by_url_id(self, url_id):
+        #получение списка уже проведенных проверок по url
         conn = self._get_connection()
         try:
             with conn.cursor(row_factory=dict_row) as cur:
