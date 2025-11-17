@@ -2,7 +2,7 @@ import psycopg2
 import requests
 
 from bs4 import BeautifulSoup
-from psycopg.rows import dict_row 
+from psycopg2.extras import RealDictCursor
 
 
 class UrlsRepository:
@@ -12,13 +12,13 @@ class UrlsRepository:
     
     def _get_connection(self):
         #создание подключения
-        return psycopg.connect(self.db_url)
+        return psycopg2.connect(self.db_url)
 
     def get_urls(self):
         #получение всей таблицы urls
         conn = self._get_connection()
         try:
-            with conn.cursor(row_factory=dict_row) as cur:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute('SELECT * FROM urls')
                 return cur.fetchall()
         finally:
@@ -28,7 +28,7 @@ class UrlsRepository:
         #поиск в таблице urls по id url
         conn = self._get_connection()
         try:
-            with conn.cursor(row_factory=dict_row) as cur:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(
                     """SELECT * FROM urls WHERE id = %s""",
                     (id,)
@@ -41,7 +41,7 @@ class UrlsRepository:
         #поиск в таблице urls по имени url
         conn = self._get_connection()
         try:
-            with conn.cursor(row_factory=dict_row) as cur:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(
                     """SELECT * FROM urls where name = %s""",
                     (name,)
@@ -74,7 +74,7 @@ class ChecksRepository:
 
     def _get_connection(self):
         #создание подключения
-        return psycopg.connect(self.db_url)
+        return psycopg2.connect(self.db_url)
 
     
     def create_check(self, url_id, url_name):
@@ -130,7 +130,7 @@ class ChecksRepository:
         #получение списка уже проведенных проверок по url
         conn = self._get_connection()
         try:
-            with conn.cursor(row_factory=dict_row) as cur:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(
                     """SELECT * FROM url_checks
                         WHERE url_id = %s
