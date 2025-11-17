@@ -1,16 +1,16 @@
+from urllib.parse import urlparse
+
 import psycopg2
 import requests
-
 from bs4 import BeautifulSoup
 from psycopg2.extras import RealDictCursor
-from urllib.parse import urlparse
 
 
 class UrlsRepository:
     """Репозиторий для работы с БД Urls"""
     def __init__(self, db_url):
         self.db_url = db_url
-    
+
     def _get_connection(self):
         #создание подключения
         return psycopg2.connect(self.db_url)
@@ -37,7 +37,7 @@ class UrlsRepository:
                 return cur.fetchone()
         finally:
             conn.close()
-    
+
     def find_by_name(self, name):
         #поиск в таблице urls по имени url
         conn = self._get_connection()
@@ -51,7 +51,7 @@ class UrlsRepository:
                 return cur.fetchone()
         finally:
             conn.close()
-    
+
     def _normalize_url(self, url):
         try:
             parced = urlparse(url)
@@ -76,7 +76,7 @@ class UrlsRepository:
             return saved_id
         finally:
             conn.close()
-    
+
     def get_url_with_checks(self):
         conn = self._get_connection()
         try:
@@ -95,7 +95,7 @@ class UrlsRepository:
                 return cur.fetchall()
         finally:
             conn.close()
-       
+
 
 class ChecksRepository:
     """Репозиторий для работы с таблицей проверок url_checks"""
@@ -106,15 +106,15 @@ class ChecksRepository:
         #создание подключения
         return psycopg2.connect(self.db_url)
 
-    
+
     def create_check(self, url_id, url_name):
         #создание в таблице url_checks новой записи о проверке
         conn = self._get_connection()
         try:
             #осуществление запроса get на url
-            response = requests.get(url_name, timeout=10) 
+            response = requests.get(url_name, timeout=10)
             #получение статус ответа (с исключением 4хх и 5хх ошибок)
-            response.raise_for_status() 
+            response.raise_for_status()
 
             #создание парсера BeautifulSoup
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -132,13 +132,13 @@ class ChecksRepository:
             description = meta_description.get('content').strip() if meta_description else ''
 
             status_code = response.status_code
-            
+
             #выполнение записи в таблицу url_checks новых данных
             with conn.cursor() as cur:
                 cur.execute(
-                    """INSERT INTO url_checks (url_id, status_code, h1, title, description) 
+                    """INSERT INTO url_checks (url_id, status_code, h1, title, description)
                         VALUES (%s, %s, %s, %s, %s) RETURNING id""",
-                    (url_id, status_code, h1, title, description) 
+                    (url_id, status_code, h1, title, description)
                 )
                 check_id = cur.fetchone()[0]
                 conn.commit()
@@ -148,7 +148,7 @@ class ChecksRepository:
             try:
                 with conn.cursor() as cur:
                     cur.execute(
-                        """INSERT INTO url_checks (url_id) VALUES (%s) 
+                        """INSERT INTO url_checks (url_id) VALUES (%s)
                         RETURNING ID""",
                         (url_id,)
                     )
@@ -160,7 +160,7 @@ class ChecksRepository:
                 return None
         finally:
             conn.close()
-    
+
     def get_checks_by_url_id(self, url_id):
         #получение списка уже проведенных проверок по url
         conn = self._get_connection()
@@ -170,11 +170,10 @@ class ChecksRepository:
                     """SELECT * FROM url_checks
                         WHERE url_id = %s
                         ORDER BY id DESC""",
-                    (url_id,)    
+                    (url_id,)
                 )
                 return cur.fetchall()
         finally:
             conn.close()
 
-    
-                
+

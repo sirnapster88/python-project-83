@@ -46,7 +46,7 @@ def create_url_from_index():
         else:
             return render_template('imdex.html', url_data=url_data, errors=errors), 422
 
-    
+
     saved_id = repo.save(url_data)
 
     flash("Страница успешно добавлена", 'success')

@@ -15,7 +15,7 @@ def validate(url_data):
 
     if not is_valid_url(url):
         errors['name'] = "Некорректный URL"
-        
+
     return errors
 
 def is_valid_url(url):
