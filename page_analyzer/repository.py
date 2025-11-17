@@ -42,7 +42,7 @@ class UrlsRepository:
         try:
             normalized_name = self._normalize_url(name)
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("""SELECT * FROM urls where name = %s""", (normalized_name,))
+                cur.execute("""SELECT * FROM urls where name = %s""", (normalized_name,)) # noqa: E501
                 return cur.fetchone()
         finally:
             conn.close()

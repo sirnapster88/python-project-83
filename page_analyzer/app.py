@@ -20,7 +20,7 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/urls")
+@app.route("/urls", methods=['POST'])
 def urls():
     urls = repo.get_url_with_checks()
     return render_template("/urls.html", urls=urls)
