@@ -1,6 +1,7 @@
 import psycopg
+import requests
 
-from psycopg.rows import dict_row
+from psycopg.rows import dict_row 
 
 
 class UrlsRepository:
@@ -67,13 +68,17 @@ class ChecksRepository:
         return psycopg.connect(self.db_url)
 
     
-    def create_check(self, url_id):
+    def create_check(self, url_id, url_name):
         conn = self._get_connection()
         try:
+            response = requests.get(url_name, timeout=10)
+            response.raise_for_status()
+            status_code = response.status_code
             with conn.cursor() as cur:
                 cur.execute(
-                    """INSERT INTO url_checks (url_id) VALUES (%s) RETURNING id""",
-                    (url_id,) 
+                    """INSERT INTO url_checks (url_id, status_code) 
+                        VALUES (%s, %s) RETURNING id""",
+                    (url_id, status_code) 
                 )
                 check_id = cur.fetchone()[0]
                 conn.commit()

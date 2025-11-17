@@ -66,8 +66,19 @@ def show_urls(id):
 
 @app.route('/urls/<int:id>/checks', methods = ['POST'])
 def check_url(id):
-    checks_repo.create_check(id)
-    flash("Страница успешно проверена",'success')
+    url = repo.find(id)
+    if not url:
+        flash('Страница не найдена','error')
+        return redirect(url_for('urls'))
+
+    
+    check_id = checks_repo.create_check(id, url['name'])
+
+    if check_id:
+        flash("Страница успешно проверена",'success')
+    else:
+        flash("Произошла ошибка при проверке",'error')
+    
     return redirect(url_for('show_urls', id=id))
 
 
