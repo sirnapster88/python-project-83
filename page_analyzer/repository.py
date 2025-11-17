@@ -3,6 +3,7 @@ import requests
 
 from bs4 import BeautifulSoup
 from psycopg2.extras import RealDictCursor
+from urllib.parse import urlparse
 
 
 class UrlsRepository:
@@ -52,9 +53,12 @@ class UrlsRepository:
             conn.close()
     
     def _normalize_url(self, url):
-        if url.endswith('/'):
-            url = url[:-1]
-        return url
+        try:
+            parced = urlparse(url)
+            normalized = f"{parced.scheme}://{parced.netloc}"
+            return normalized
+        except Exception:
+            return url
 
 
     def save(self, url_data):
