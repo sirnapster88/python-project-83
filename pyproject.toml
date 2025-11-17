@@ -5,6 +5,7 @@ description = "Page Analyzer"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "beautifulsoup4>=4.14.2",
     "flask>=2.3.0",
     "gunicorn",
     "psycopg>=3.2.12",

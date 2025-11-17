@@ -71,14 +71,14 @@ def check_url(id):
         flash('Страница не найдена','error')
         return redirect(url_for('urls'))
 
-    
+
     check_id = checks_repo.create_check(id, url['name'])
 
     if check_id:
         flash("Страница успешно проверена",'success')
     else:
         flash("Произошла ошибка при проверке",'error')
-    
+
     return redirect(url_for('show_urls', id=id))
 
 
