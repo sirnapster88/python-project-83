@@ -83,6 +83,13 @@ class ChecksRepository:
                 check_id = cur.fetchone()[0]
                 conn.commit()
             return check_id
+        except requests.exceptions.HTTPError as e:
+            print(f"HTTP ошибка при проверке сайта {url_name}: {e}")
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"Ошибка соединения при проверке {url_name}: {e}")
+            return None
+
         finally:
             conn.close()
     
