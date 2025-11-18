@@ -42,7 +42,7 @@ def create_url_from_index():
         return redirect(url_for("show_urls", id=existing_url["id"]))
 
     if errors:
-        for _field, error in errors.items():
+        for error in errors.values():
             flash(error, "error")
             return render_template("index.html", url_data=url_data, errors=errors), 422  # noqa: E501
 
