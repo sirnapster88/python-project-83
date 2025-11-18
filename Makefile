@@ -5,7 +5,7 @@ build:
 	./build.sh
 
 lint:
-	uv run ruff check page_analyzer/app.py
+	uv run ruff check page_analyzer/
 
 dev:
 	uv run flask --debug --app page_analyzer.app:app run
