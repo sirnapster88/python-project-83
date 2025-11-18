@@ -26,9 +26,9 @@ def urls():
     return render_template("/urls.html", urls=urls)
 
 
-@app.route("/urls", methods=["POST"])
 @app.route("/", methods=["POST"])
-def create_url():
+@app.route("/urls", methods=["POST"])
+def create_url_from_index():
     url = request.form.get("url")
     url_data = {
         "name": url,
@@ -42,12 +42,12 @@ def create_url():
         return redirect(url_for("show_urls", id=existing_url["id"]))
 
     if errors:
-        for field, error in errors.items():
+        for error in errors.items():
             flash(f"{error}", "error")
-        if request.path == "/urls":
-            return render_template("index.html", url_data=url_data, errors=errors), 422
+        if request.path == "/":
+            return render_template("index.html", url_data=url_data, errors=errors), 422  # noqa: E501
         else:
-            return render_template("urls.html", url_data=url_data, errors=errors), 422
+            return render_template("urls.html", url_data=url_data, errors=errors), 422  # noqa: E501
 
     saved_id = repo.save(url_data)
 

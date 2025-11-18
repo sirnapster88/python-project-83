@@ -1,9 +1,9 @@
+from urllib.parse import urlparse
+
 import psycopg2
 import requests
-
 from bs4 import BeautifulSoup
 from psycopg2.extras import RealDictCursor
-from urllib.parse import urlparse
 
 
 class UrlsRepository:
@@ -42,8 +42,7 @@ class UrlsRepository:
         try:
             normalized_name = self._normalize_url(name)
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("""SELECT * FROM urls where name = %s""",
-                (normalized_name,))
+                cur.execute("""SELECT * FROM urls where name = %s""", (normalized_name,))  # noqa: E501
                 return cur.fetchone()
         finally:
             conn.close()
@@ -61,10 +60,8 @@ class UrlsRepository:
         conn = self._get_connection()
         try:
             normalized_name = self._normalize_url(url_data["name"])
-            print(normalized_name)
             with conn.cursor() as cur:
-                cur.execute("""INSERT INTO urls (name) VALUES (%s) RETURNING id""", 
-                (normalized_name,))
+                cur.execute("""INSERT INTO urls (name) VALUES (%s) RETURNING id""", (normalized_name,))  # noqa: E501
                 saved_id = cur.fetchone()[0]
                 conn.commit()
             return saved_id
@@ -83,7 +80,8 @@ class UrlsRepository:
                             uc.status_code
                         FROM urls u
                         LEFT JOIN url_checks uc ON u.id=uc.url_id
-                        AND uc.id = (SELECT MAX(id) FROM url_checks WHERE url_id = u.id)
+                        AND uc.id = (SELECT MAX(id) FROM url_checks 
+                        WHERE url_id = u.id)
                         ORDER BY u.id DESC"""
                 )
                 return cur.fetchall()
@@ -123,14 +121,15 @@ class ChecksRepository:
 
             # получение meta
             meta_description = soup.find("meta", attrs={"name": "description"})
-            description = meta_description.get("content").strip() if meta_description else ""
+            description = meta_description.get("content").strip() if meta_description else ""  # noqa: E501
 
             status_code = response.status_code
 
             # выполнение записи в таблицу url_checks новых данных
             with conn.cursor() as cur:
                 cur.execute(
-                    """INSERT INTO url_checks (url_id, status_code, h1, title, description) 
+                    """INSERT INTO url_checks 
+                        (url_id, status_code, h1, title, description)
                         VALUES (%s, %s, %s, %s, %s) RETURNING id""",
                     (url_id, status_code, h1, title, description),
                 )
@@ -142,7 +141,7 @@ class ChecksRepository:
             try:
                 with conn.cursor() as cur:
                     cur.execute(
-                        """INSERT INTO url_checks (url_id) VALUES (%s) 
+                        """INSERT INTO url_checks (url_id) VALUES (%s)
                         RETURNING ID""",
                         (url_id,),
                     )
