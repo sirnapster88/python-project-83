@@ -42,10 +42,9 @@ def create_url_from_index():
         return redirect(url_for("show_urls", id=existing_url["id"]))
 
     if errors:
-        for field, error in errors.items():
+        for _field, error in errors.items():
             flash(error, "error")
             return render_template("index.html", url_data=url_data, errors=errors), 422  # noqa: E501
-       
 
     saved_id = repo.save(url_data)
 
