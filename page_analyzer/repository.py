@@ -80,7 +80,7 @@ class UrlsRepository:
                             uc.status_code
                         FROM urls u
                         LEFT JOIN url_checks uc ON u.id=uc.url_id
-                        AND uc.id = (SELECT MAX(id) FROM url_checks 
+                        AND uc.id = (SELECT MAX(id) FROM url_checks
                         WHERE url_id = u.id)
                         ORDER BY u.id DESC"""
                 )
@@ -128,7 +128,7 @@ class ChecksRepository:
             # выполнение записи в таблицу url_checks новых данных
             with conn.cursor() as cur:
                 cur.execute(
-                    """INSERT INTO url_checks 
+                    """INSERT INTO url_checks
                         (url_id, status_code, h1, title, description)
                         VALUES (%s, %s, %s, %s, %s) RETURNING id""",
                     (url_id, status_code, h1, title, description),
