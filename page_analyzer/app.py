@@ -3,8 +3,10 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
+from .checker import create_check
 from .repository import ChecksRepository, UrlsRepository
 from .validator import validate
+
 
 load_dotenv()
 app = Flask(__name__)
@@ -29,11 +31,8 @@ def urls():
 @app.route("/urls", methods=["POST"])
 def create_url_from_index():
     url = request.form.get("url")
-    url_data = {
-        "name": url,
-    }
 
-    errors = validate(url_data)
+    errors = validate(url)
 
     existing_url = repo.find_by_name(url)
     if existing_url:
@@ -43,9 +42,9 @@ def create_url_from_index():
     if errors:
         for error in errors.values():
             flash(error, "error")
-            return render_template("index.html", url_data=url_data, errors=errors), 422  # noqa: E501
+            return render_template("index.html", url=url, errors=errors), 422  # noqa: E501
 
-    saved_id = repo.save(url_data)
+    saved_id = repo.save(url)
 
     flash("Страница успешно добавлена", "success")
     return redirect(url_for("show_urls", id=saved_id))
@@ -70,10 +69,14 @@ def check_url(id):
         flash("Страница не найдена", "error")
         return redirect(url_for("urls"))
 
-    check_id = checks_repo.create_check(id, url["name"])
+    check_data = create_check(url["name"])
 
-    if check_id:
-        flash("Страница успешно проверена", "success")
+    if check_data:
+        check_id = checks_repo.create_check(id, check_data)
+        if check_id:
+            flash("Страница успешно проверена", "success")
+        else:
+            flash("Ошибка при сохранении результатов проверки","error")
     else:
         flash("Произошла ошибка при проверке", "error")
 

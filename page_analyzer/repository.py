@@ -55,11 +55,11 @@ class UrlsRepository:
         except Exception:
             return url
 
-    def save(self, url_data):
+    def save(self, url):
         # функция добавления новой записи в таблицу urls
         conn = self._get_connection()
         try:
-            normalized_name = self._normalize_url(url_data["name"])
+            normalized_name = self._normalize_url(url)
             with conn.cursor() as cur:
                 cur.execute("""INSERT INTO urls (name) VALUES (%s) RETURNING id""", (normalized_name,))  # noqa: E501
                 saved_id = cur.fetchone()[0]
@@ -99,58 +99,27 @@ class ChecksRepository:
         # создание подключения
         return psycopg2.connect(self.db_url)
 
-    def create_check(self, url_id, url_name):
+    def create_check(self, url_id, check_data):
         # создание в таблице url_checks новой записи о проверке
         conn = self._get_connection()
         try:
-            # осуществление запроса get на url
-            response = requests.get(url_name, timeout=10)
-            # получение статус ответа (с исключением 4хх и 5хх ошибок)
-            response.raise_for_status()
-
-            # создание парсера BeautifulSoup
-            soup = BeautifulSoup(response.text, "html.parser")
-
-            # получение тега h1
-            h1_tag = soup.find("h1")
-            h1 = h1_tag.get_text().strip() if h1_tag else ""
-
-            # получение тега title
-            title_tag = soup.find("title")
-            title = title_tag.get_text().strip() if title_tag else ""
-
-            # получение meta
-            meta_description = soup.find("meta", attrs={"name": "description"})
-            description = meta_description.get("content").strip() if meta_description else ""  # noqa: E501
-
-            status_code = response.status_code
-
             # выполнение записи в таблицу url_checks новых данных
             with conn.cursor() as cur:
                 cur.execute(
                     """INSERT INTO url_checks
                         (url_id, status_code, h1, title, description)
                         VALUES (%s, %s, %s, %s, %s) RETURNING id""",
-                    (url_id, status_code, h1, title, description),
+                    (url_id, 
+                    check_data.get("status_code"), 
+                    check_data.get("h1",""),
+                    check_data.get("title",""), 
+                    check_data.get("description","")),
                 )
                 check_id = cur.fetchone()[0]
                 conn.commit()
             return check_id
         except Exception as e:
             print(f"Ошибка при создании проверки:{e}")
-            try:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        """INSERT INTO url_checks (url_id) VALUES (%s)
-                        RETURNING ID""",
-                        (url_id,),
-                    )
-                check_id = cur.fetchone()[0]
-                conn.commit()
-                return check_id
-            except Exception as inner_e:
-                print(f"Ошибка при создании пустой проверки:{inner_e}")
-                return None
         finally:
             conn.close()
 
