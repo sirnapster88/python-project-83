@@ -26,7 +26,6 @@ def urls():
     return render_template("/urls.html", urls=urls)
 
 
-@app.route("/", methods=["POST"])
 @app.route("/urls", methods=["POST"])
 def create_url_from_index():
     url = request.form.get("url")
