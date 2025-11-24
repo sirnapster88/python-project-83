@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
 from .checker import create_check
+from .normalizer import _normalize_url
 from .repository import ChecksRepository, UrlsRepository
 from .validator import validate
 
@@ -33,17 +34,19 @@ def create_url_from_index():
 
     errors = validate(url)
 
-    existing_url = repo.find_by_name(url)
-    if existing_url:
-        flash("Страница уже существует", "error")
-        return redirect(url_for("show_urls", id=existing_url["id"]))
-
     if errors:
         for error in errors.values():
             flash(error, "error")
             return render_template("index.html", url=url, errors=errors), 422  # noqa: E501
 
-    saved_id = repo.save(url)
+    normalized_url = _normalize_url(url)
+
+    existing_url = repo.find_by_name(normalized_url)
+    if existing_url:
+        flash("Страница уже существует", "error")
+        return redirect(url_for("show_urls", id=existing_url["id"]))
+ 
+    saved_id = repo.save(normalized_url)
 
     flash("Страница успешно добавлена", "success")
     return redirect(url_for("show_urls", id=saved_id))

@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-from .normalizer import _normalize_url
+
 
 
 class UrlsRepository:
@@ -34,24 +34,22 @@ class UrlsRepository:
         finally:
             conn.close()
 
-    def find_by_name(self, name):
+    def find_by_name(self, normalized_url):
         # поиск в таблице urls по имени url
         conn = self._get_connection()
         try:
-            normalized_name = _normalize_url(name)
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("""SELECT * FROM urls where name = %s""", (normalized_name,))  # noqa: E501
+                cur.execute("""SELECT * FROM urls where name = %s""", (normalized_url,))  # noqa: E501
                 return cur.fetchone()
         finally:
             conn.close()
 
-    def save(self, url):
+    def save(self, normalized_url):
         # функция добавления новой записи в таблицу urls
         conn = self._get_connection()
         try:
-            normalized_name = _normalize_url(url)
             with conn.cursor() as cur:
-                cur.execute("""INSERT INTO urls (name) VALUES (%s) RETURNING id""", (normalized_name,))  # noqa: E501
+                cur.execute("""INSERT INTO urls (name) VALUES (%s) RETURNING id""", (normalized_url,))  # noqa: E501
                 saved_id = cur.fetchone()[0]
                 conn.commit()
             return saved_id
