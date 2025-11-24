@@ -42,16 +42,16 @@ def create_url():
     existing_url = repo.find_by_name(normalized_url)
     if existing_url:
         flash("Страница уже существует", "error")
-        return redirect(url_for("show_urls", id=existing_url["id"]))
+        return redirect(url_for("show_urls_info", id=existing_url["id"]))
 
     saved_id = repo.save(normalized_url)
 
     flash("Страница успешно добавлена", "success")
-    return redirect(url_for("show_urls", id=saved_id))
+    return redirect(url_for("show_urls_info", id=saved_id))
 
 
 @app.route("/urls/<int:id>")
-def show_urls(id):
+def show_urls_info(id):
     url = repo.find(id)
     if not url:
         flash("Страница не найдена", "error")
@@ -59,7 +59,7 @@ def show_urls(id):
 
     checks = checks_repo.get_checks_by_url_id(id)
 
-    return render_template("show_urls.html", url=url, checks=checks)
+    return render_template("url_info.html", url=url, checks=checks)
 
 
 @app.route("/urls/<int:id>/checks", methods=["POST"])
@@ -80,7 +80,7 @@ def check_url(id):
     else:
         flash("Произошла ошибка при проверке", "error")
 
-    return redirect(url_for("show_urls", id=id))
+    return redirect(url_for("show_urls_info", id=id))
 
 
 if __name__ == "__main__":
