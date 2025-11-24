@@ -25,7 +25,7 @@ def create_check(url):
 
         status_code = response.status_code
 
-        return {"status_code": status_code, "h1": h1, "title": title, "description": description}
+        return {"status_code": status_code, "h1": h1, "title": title, "description": description} # noqa: E501
     except Exception as e:
         print(f"Ошибка при проверке URL {url}: {e}")
         return None
