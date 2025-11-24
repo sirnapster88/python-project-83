@@ -7,7 +7,6 @@ from .checker import create_check
 from .repository import ChecksRepository, UrlsRepository
 from .validator import validate
 
-
 load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -76,7 +75,7 @@ def check_url(id):
         if check_id:
             flash("Страница успешно проверена", "success")
         else:
-            flash("Ошибка при сохранении результатов проверки","error")
+            flash("Ошибка при сохранении результатов проверки", "error")
     else:
         flash("Произошла ошибка при проверке", "error")
 

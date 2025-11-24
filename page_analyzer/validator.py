@@ -1,10 +1,9 @@
 import validators
-from urllib.parse import urlparse
 
 
 def validate(url):
     errors = {}
-    
+
     if not url or not url.strip():
         errors["name"] = "Не может быть пустым"
         return errors
