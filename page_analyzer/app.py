@@ -45,7 +45,7 @@ def create_url_from_index():
     if existing_url:
         flash("Страница уже существует", "error")
         return redirect(url_for("show_urls", id=existing_url["id"]))
- 
+
     saved_id = repo.save(normalized_url)
 
     flash("Страница успешно добавлена", "success")
