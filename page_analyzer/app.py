@@ -71,12 +71,8 @@ def check_url(id):
 
     check_data = get_check_info(url["name"])
 
-    if check_data:
-        check_id = checks_repo.create_check(id, check_data)
-        if check_id:
-            flash("Страница успешно проверена", "success")
-        else:
-            flash("Ошибка при сохранении результатов проверки", "error")
+    if check_data and checks_repo.create_check(id, check_data):
+        flash("Страница успешно проверена", "success")
     else:
         flash("Произошла ошибка при проверке", "error")
 
