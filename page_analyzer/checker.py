@@ -11,7 +11,7 @@ def get_check_info(url):
     except requests.RequestException as e:
         print(f"Ошибка при проверке URL {url}: {e}")
         return None
-    
+
     # создание парсера BeautifulSoup
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -30,4 +30,3 @@ def get_check_info(url):
     status_code = response.status_code
 
     return {"status_code": status_code, "h1": h1, "title": title, "description": description}  # noqa: E501
-  
