@@ -106,7 +106,7 @@ class ChecksRepository:
                 check_id = cur.fetchone()[0]
                 conn.commit()
             return check_id
-        except Exception as e:
+        except psycopg2.errors.DatabaseError as e:
             print(f"Ошибка при создании проверки:{e}")
         finally:
             conn.close()

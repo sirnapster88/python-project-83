@@ -3,10 +3,10 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
-from .checker import create_check
-from .normalizer import _normalize_url
-from .repository import ChecksRepository, UrlsRepository
-from .validator import validate
+from page_analyzer.checker import check_url
+from page_analyzer.normalizer import normalize_url
+from page_analyzer.repository import ChecksRepository, UrlsRepository
+from page_analyzer.validator import validate
 
 load_dotenv()
 app = Flask(__name__)
@@ -25,21 +25,19 @@ def index():
 @app.route("/urls")
 def urls():
     urls = repo.get_url_with_checks()
-    return render_template("/urls.html", urls=urls)
+    return render_template("urls.html", urls=urls)
 
 
 @app.route("/urls", methods=["POST"])
-def create_url_from_index():
+def create_url():
     url = request.form.get("url")
 
     errors = validate(url)
+    for error in errors.values():
+        flash(error, "error")
+        return render_template("index.html", url=url, errors=errors), 422  # noqa: E501
 
-    if errors:
-        for error in errors.values():
-            flash(error, "error")
-            return render_template("index.html", url=url, errors=errors), 422  # noqa: E501
-
-    normalized_url = _normalize_url(url)
+    normalized_url = normalize_url(url)
 
     existing_url = repo.find_by_name(normalized_url)
     if existing_url:
@@ -71,7 +69,7 @@ def check_url(id):
         flash("Страница не найдена", "error")
         return redirect(url_for("urls"))
 
-    check_data = create_check(url["name"])
+    check_data = check_url(url["name"])
 
     if check_data:
         check_id = checks_repo.create_check(id, check_data)
