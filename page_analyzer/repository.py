@@ -8,13 +8,13 @@ class UrlsRepository:
     def __init__(self, db_url):
         self.db_url = db_url
 
-    def _get_connection(self):
+    def get_connection(self):
         # создание подключения
         return psycopg2.connect(self.db_url)
 
     def get_urls(self):
         # получение всей таблицы urls
-        conn = self._get_connection()
+        conn = self.get_connection()
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("SELECT * FROM urls")
@@ -24,7 +24,7 @@ class UrlsRepository:
 
     def find(self, id):
         # поиск в таблице urls по id url
-        conn = self._get_connection()
+        conn = self.get_connection()
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("""SELECT * FROM urls WHERE id = %s""", (id,))
@@ -34,7 +34,7 @@ class UrlsRepository:
 
     def find_by_name(self, normalized_url):
         # поиск в таблице urls по имени url
-        conn = self._get_connection()
+        conn = self.get_connection()
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("""SELECT * FROM urls where name = %s""", (normalized_url,))  # noqa: E501
@@ -44,7 +44,7 @@ class UrlsRepository:
 
     def save(self, normalized_url):
         # функция добавления новой записи в таблицу urls
-        conn = self._get_connection()
+        conn = self.get_connection()
         try:
             with conn.cursor() as cur:
                 cur.execute("""INSERT INTO urls (name) VALUES (%s) RETURNING id""", (normalized_url,))  # noqa: E501
@@ -55,7 +55,7 @@ class UrlsRepository:
             conn.close()
 
     def get_url_with_checks(self):
-        conn = self._get_connection()
+        conn = self.get_connection()
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(
@@ -81,13 +81,13 @@ class ChecksRepository:
     def __init__(self, db_url):
         self.db_url = db_url
 
-    def _get_connection(self):
+    def get_connection(self):
         # создание подключения
         return psycopg2.connect(self.db_url)
 
     def create_check(self, url_id, check_data):
         # создание в таблице url_checks новой записи о проверке
-        conn = self._get_connection()
+        conn = self.get_connection()
         try:
             # выполнение записи в таблицу url_checks новых данных
             with conn.cursor() as cur:
@@ -113,7 +113,7 @@ class ChecksRepository:
 
     def get_checks_by_url_id(self, url_id):
         # получение списка уже проведенных проверок по url
-        conn = self._get_connection()
+        conn = self.get_connection()
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(

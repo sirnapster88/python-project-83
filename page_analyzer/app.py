@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
-from page_analyzer.checker import check_url
+from page_analyzer.checker import get_check_info
 from page_analyzer.normalizer import normalize_url
 from page_analyzer.repository import ChecksRepository, UrlsRepository
 from page_analyzer.validator import validate
@@ -69,7 +69,7 @@ def check_url(id):
         flash("Страница не найдена", "error")
         return redirect(url_for("urls"))
 
-    check_data = check_url(url["name"])
+    check_data = get_check_info(url["name"])
 
     if check_data:
         check_id = checks_repo.create_check(id, check_data)

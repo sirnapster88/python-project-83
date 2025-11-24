@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def check_url(url):
+def get_check_info(url):
     try:
         # осуществление запроса get на url
         response = requests.get(url, timeout=10)
