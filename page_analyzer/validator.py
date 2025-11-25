@@ -4,11 +4,11 @@ import validators
 def validate(url):
     errors = {}
 
-    if not url or not url.strip():
+    url = url.strip()
+
+    if not url:
         errors["name"] = "Не может быть пустым"
         return errors
-
-    url = url.strip()
 
     if len(url) > 255:
         errors["name"] = "URL не должен превышать 255 символов"

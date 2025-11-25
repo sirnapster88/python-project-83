@@ -29,7 +29,7 @@ def urls():
 
 
 @app.route("/urls", methods=["POST"])
-def create_url_from_index():
+def create_url():
     url = request.form.get("url")
 
     errors = validate(url)

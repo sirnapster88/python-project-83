@@ -8,7 +8,7 @@ def get_check_info(url):
         response = requests.get(url, timeout=10)
         # получение статус ответа (с исключением 4хх и 5хх ошибок)
         response.raise_for_status()
-    except request.RequestException as e:
+    except requests.RequestException as e:
         print(f"Ошибка при проверке URL {url}: {e}")
         return None
 
@@ -30,4 +30,3 @@ def get_check_info(url):
     status_code = response.status_code
 
     return {"status_code": status_code, "h1": h1, "title": title, "description": description}  # noqa: E501
-    
